@@ -39,11 +39,6 @@ const ProductOverviewScreen = ({ route, navigation }: Props) => {
           onSelect={() => {
             selectHandler(item.id, item.title);
           }}
-          // onAddToCart={() => {
-          //   dispatch(
-          //     addToCart({ id: item.id, price: item.price, title: item.title })
-          //   );
-          // }}
         >
           <Button
             color={Colors.primary}

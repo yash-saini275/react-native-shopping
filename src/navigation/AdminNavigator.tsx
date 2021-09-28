@@ -16,8 +16,8 @@ const AdminNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primary },
-        headerTintColor: "white",
+        headerStyle: { backgroundColor: Platform.OS === "android" ? Colors.primary : "" },
+        headerTintColor: Platform.OS === "android" ? "white" : Colors.primary,
       }}
     >
       <Stack.Screen

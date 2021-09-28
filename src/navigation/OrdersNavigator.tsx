@@ -13,8 +13,8 @@ const OrdersNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primary },
-        headerTintColor: "white",
+        headerStyle: { backgroundColor: Platform.OS === "android" ? Colors.primary : "white" },
+        headerTintColor: Platform.OS === "android" ? "white" : Colors.primary,
       }}
     >
       <Stack.Screen

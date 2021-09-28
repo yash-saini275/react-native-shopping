@@ -3,13 +3,12 @@ import {
   View,
   Text,
   Image,
-  Button,
   TouchableOpacity,
   TouchableNativeFeedback,
   Platform,
   StyleSheet,
 } from "react-native";
-import Colors from "../../constants/Colors";
+
 import Card from "../UI/Card";
 
 const ProductItem: React.FC<{
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
   },
   details: {
     alignItems: "center",
-    height: "15%",
+    height: "18%",
     padding: 10,
   },
   imageContainer: {
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    height: "25%",
+    height: "22%",
     paddingHorizontal: 20,
   },
 });
