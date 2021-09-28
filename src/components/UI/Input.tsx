@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from "react";
+import React, { useReducer, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -20,33 +20,36 @@ interface InputState {
 
 interface InputAction {
   type: ActionType;
-  payload: {
-    value?: string;
-    isValid?: boolean;
-    touched?: boolean;
+  payload?: {
+    value: string;
+    isValid: boolean;
   };
 }
 
 const inputReducer = (state: InputState, action: InputAction) => {
   switch (action.type) {
     case ActionType.INPUT_CHANGE:
+      if (!action.payload) {
+        break;
+      }
       return {
         ...state,
-        value: action.payload.value || state.value,
-        isValid: action.payload.isValid || state.isValid,
+        value: action.payload.value,
+        isValid: action.payload.isValid,
       };
-
     case ActionType.INPUT_BLUR:
       return {
         ...state,
-        touched: action.payload.touched || state.touched,
+        touched: true,
       };
     default:
       return state;
   }
+  return state;
 };
 
 const Input: React.FC<{
+  id: string;
   initialValue: string;
   initiallyValid: boolean;
   label: string;
@@ -55,8 +58,9 @@ const Input: React.FC<{
   min?: number;
   max?: number;
   minLength?: number;
+  errorText: string;
   textInputProps?: TextInputProps;
-  onInputChange: (value: string, isValid: boolean) => void;
+  onInputChange: (id: string, value: string, isValid: boolean) => void;
 }> = (props) => {
   const [inputState, dispatch] = useReducer(inputReducer, {
     value: props.initialValue || "",
@@ -64,14 +68,13 @@ const Input: React.FC<{
     touched: false,
   });
 
-  const { onInputChange } = props;
+  const { onInputChange, id } = props;
 
   useEffect(() => {
-    console.log(inputState);
     if (inputState.touched) {
-      onInputChange(inputState.value, inputState.isValid);
+      onInputChange(id, inputState.value, inputState.isValid);
     }
-  }, [inputState, onInputChange]);
+  }, [inputState, onInputChange, id]);
 
   const textChangeHandler = (text: string) => {
     const emailRegex =
@@ -99,6 +102,8 @@ const Input: React.FC<{
       isValid = false;
     }
 
+    console.log(text, isValid);
+
     dispatch({
       type: ActionType.INPUT_CHANGE,
       payload: {
@@ -108,21 +113,25 @@ const Input: React.FC<{
     });
   };
 
-  const lostFocusHandler = () => {
-    dispatch({ type: ActionType.INPUT_BLUR, payload: { touched: true } });
-  };
+  const lostFocusHandler = useCallback(() => {
+    dispatch({ type: ActionType.INPUT_BLUR });
+  }, []);
 
   return (
     <View style={styles.formControl}>
       <Text style={styles.label}>{props.label}</Text>
       <TextInput
-        {...props.textInputProps}
         style={styles.input}
         value={inputState.value}
         onChangeText={textChangeHandler}
         onBlur={lostFocusHandler}
+        {...props.textInputProps}
       />
-      {!props.initiallyValid && <Text>Please enter a valid {props.label}</Text>}
+      {!inputState.isValid && inputState.touched && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{props.errorText}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -140,6 +149,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderBottomColor: "#ccc",
     borderBottomWidth: 1,
+  },
+  errorContainer: {
+    marginVertical: 5,
+  },
+  errorText: {
+    fontFamily: "open-sans",
+    color: "red",
+    fontSize: 13,
   },
 });
 

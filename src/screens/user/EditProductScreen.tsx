@@ -1,8 +1,14 @@
 import React, { useEffect, useReducer, useCallback } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSelector, useDispatch } from "react-redux";
-import { View, Text, StyleSheet, Platform, Alert } from "react-native";
-import { ScrollView, TextInput } from "react-native-gesture-handler";
+import {
+  View,
+  StyleSheet,
+  Platform,
+  Alert,
+  KeyboardAvoidingView,
+} from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import { AdminNavigatorParamsList } from "../../navigation/types";
 import { RootState } from "../../store";
@@ -70,7 +76,6 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
     default:
       return state;
   }
-  return state;
 };
 
 const EditProductScreen = ({ route, navigation }: Props) => {
@@ -116,9 +121,9 @@ const EditProductScreen = ({ route, navigation }: Props) => {
         );
       },
     });
-  });
+  }, []);
 
-  const submitHandler = () => {
+  const submitHandler = useCallback(() => {
     if (!formState.formIsValid) {
       Alert.alert("Wrong Input!", "Please check the errors in the form.", [
         { text: "Okay" },
@@ -145,11 +150,10 @@ const EditProductScreen = ({ route, navigation }: Props) => {
       );
     }
     navigation.goBack();
-  };
+  }, [dispatch, prodId, formState]);
 
   const inputChangeHandler = useCallback(
     (identifier: string, inputValue: string, inputValidity: boolean) => {
-      console.log(identifier, inputValue, inputValidity);
       dispatchFormState({
         type: FormActionType.UPDATE,
         payload: {
@@ -163,59 +167,63 @@ const EditProductScreen = ({ route, navigation }: Props) => {
   );
 
   return (
-    <ScrollView>
-      <View style={styles.form}>
-        <Input
-          initialValue={formState.inputValues.title}
-          initiallyValid={!!product}
-          label="Title"
-          required
-          onInputChange={inputChangeHandler.bind(this, "title")}
-        />
-        <Input
-          initialValue={formState.inputValues.imageUrl}
-          initiallyValid={!!product}
-          label="Image URL"
-          required
-          onInputChange={inputChangeHandler.bind(this, "imageUrl")}
-        />
-        {!product && (
+    <KeyboardAvoidingView
+      behavior="padding"
+      keyboardVerticalOffset={100}
+      style={{ flex: 1 }}
+    >
+      <ScrollView>
+        <View style={styles.form}>
           <Input
-            initialValue={formState.inputValues.price}
+            id="title"
+            initialValue={formState.inputValues.title}
             initiallyValid={!!product}
-            label="Price"
-            textInputProps={{ keyboardType: "decimal-pad" }}
-            onInputChange={inputChangeHandler.bind(this, "price")}
+            errorText="Please enter a valid title."
+            label="Title"
+            required
+            onInputChange={inputChangeHandler}
           />
-        )}
-
-        <Input
-          initialValue={formState.inputValues.description}
-          initiallyValid={!!product}
-          label="Description"
-          onInputChange={inputChangeHandler.bind(this, "description")}
-        />
-      </View>
-    </ScrollView>
+          <Input
+            id="imageUrl"
+            initialValue={formState.inputValues.imageUrl}
+            initiallyValid={!!product}
+            errorText="Please enter a valid image URL."
+            label="Image URL"
+            required
+            onInputChange={inputChangeHandler}
+          />
+          {!product && (
+            <Input
+              id="price"
+              initialValue={formState.inputValues.price}
+              initiallyValid={!!product}
+              errorText="Please enter a valid price."
+              label="Price"
+              textInputProps={{ keyboardType: "decimal-pad" }}
+              required
+              min={0.1}
+              onInputChange={inputChangeHandler}
+            />
+          )}
+          <Input
+            id="description"
+            initialValue={formState.inputValues.description}
+            errorText="Please enter a valid description."
+            initiallyValid={!!product}
+            label="Description"
+            required
+            minLength={5}
+            onInputChange={inputChangeHandler}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   form: {
     margin: 20,
-  },
-  formControl: {
-    width: "100%",
-  },
-  label: {
-    fontFamily: "open-sans-bold",
-    marginVertical: 8,
-  },
-  input: {
-    paddingVertical: 2,
-    paddingHorizontal: 5,
-    borderBottomColor: "#ccc",
-    borderBottomWidth: 1,
   },
 });
 
